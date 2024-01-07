@@ -31,14 +31,14 @@ add_custom_command(
     DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/build-info.cpp.in" ${GIT_INDEX}
     VERBATIM
 )
-set(TARGET build_info)
+set(TARGET powerinfer_build_info)
 add_library(${TARGET} OBJECT build-info.cpp)
 if (BUILD_SHARED_LIBS)
     set_target_properties(${TARGET} PROPERTIES POSITION_INDEPENDENT_CODE ON)
 endif()
 
 
-set(TARGET common)
+set(TARGET powerinfer_common)
 
 add_library(${TARGET} STATIC
     base64.hpp
@@ -60,4 +60,4 @@ endif()
 
 target_include_directories(${TARGET} PUBLIC .)
 target_compile_features(${TARGET} PUBLIC cxx_std_11)
-target_link_libraries(${TARGET} PRIVATE llama build_info)
+target_link_libraries(${TARGET} PRIVATE powerinfer_llama powerinfer_build_info)

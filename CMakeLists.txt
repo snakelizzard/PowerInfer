@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.13)  # for add_link_options
-project("llama.cpp" C CXX)
+project(powerinfer C CXX)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
@@ -640,7 +640,7 @@ if (GGML_USE_CPU_HBM)
     find_library(memkind memkind REQUIRED)
 endif()
 
-add_library(ggml OBJECT
+add_library(powerinfer_ggml OBJECT
             ggml.c
             ggml.h
             ggml-alloc.c
@@ -656,40 +656,40 @@ add_library(ggml OBJECT
             ${GGML_SOURCES_EXTRA} ${GGML_HEADERS_EXTRA}
             )
 
-target_include_directories(ggml PUBLIC . ${LLAMA_EXTRA_INCLUDES})
-target_compile_features(ggml PUBLIC c_std_11) # don't bump
-target_link_libraries(ggml PUBLIC Threads::Threads ${LLAMA_EXTRA_LIBS})
+target_include_directories(powerinfer_ggml PUBLIC . ${LLAMA_EXTRA_INCLUDES})
+target_compile_features(powerinfer_ggml PUBLIC c_std_11) # don't bump
+target_link_libraries(powerinfer_ggml PUBLIC Threads::Threads ${LLAMA_EXTRA_LIBS})
 if (GGML_USE_CPU_HBM)
-    target_link_libraries(ggml PUBLIC memkind)
+    target_link_libraries(powerinfer_ggml PUBLIC memkind)
 endif()
 
-add_library(ggml_static STATIC $<TARGET_OBJECTS:ggml>)
+add_library(powerinfer_ggml_static STATIC $<TARGET_OBJECTS:ggml>)
 if (BUILD_SHARED_LIBS)
-    set_target_properties(ggml PROPERTIES POSITION_INDEPENDENT_CODE ON)
-    add_library(ggml_shared SHARED $<TARGET_OBJECTS:ggml>)
-    target_link_libraries(ggml_shared PUBLIC Threads::Threads ${LLAMA_EXTRA_LIBS})
-    install(TARGETS ggml_shared LIBRARY)
+    set_target_properties(powerinfer_ggml PROPERTIES POSITION_INDEPENDENT_CODE ON)
+    add_library(powerinfer_ggml_shared SHARED $<TARGET_OBJECTS:ggml>)
+    target_link_libraries(powerinfer_ggml_shared PUBLIC Threads::Threads ${LLAMA_EXTRA_LIBS})
+    install(TARGETS powerinfer_ggml_shared LIBRARY)
 endif()
 
 # llama
 
-add_library(llama
+add_library(powerinfer_llama
             llama.cpp
             llama.h
             )
 
-target_include_directories(llama PUBLIC .)
-target_compile_features(llama PUBLIC cxx_std_11) # don't bump
-target_link_libraries(llama PRIVATE
-    ggml
+target_include_directories(powerinfer_llama PUBLIC .)
+target_compile_features(powerinfer_llama PUBLIC cxx_std_11) # don't bump
+target_link_libraries(powerinfer_llama PRIVATE
+    powerinfer_ggml
     ${LLAMA_EXTRA_LIBS}
     )
 
 if (BUILD_SHARED_LIBS)
-    set_target_properties(llama PROPERTIES POSITION_INDEPENDENT_CODE ON)
-    target_compile_definitions(llama PRIVATE LLAMA_SHARED LLAMA_BUILD)
+    set_target_properties(powerinfer_llama PROPERTIES POSITION_INDEPENDENT_CODE ON)
+    target_compile_definitions(powerinfer_llama PRIVATE LLAMA_SHARED LLAMA_BUILD)
     if (LLAMA_METAL)
-        set_target_properties(llama PROPERTIES RESOURCE "${CMAKE_CURRENT_SOURCE_DIR}/ggml-metal.metal")
+        set_target_properties(powerinfer_llama PROPERTIES RESOURCE "${CMAKE_CURRENT_SOURCE_DIR}/ggml-metal.metal")
     endif()
 endif()
 
